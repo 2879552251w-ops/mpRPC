@@ -1,0 +1,13 @@
+/home/mysql/RPC/build/CMakeFiles/edit_cache.dir
+/home/mysql/RPC/build/CMakeFiles/rebuild_cache.dir
+/home/mysql/RPC/build/src/CMakeFiles/mprpc.dir
+/home/mysql/RPC/build/src/CMakeFiles/edit_cache.dir
+/home/mysql/RPC/build/src/CMakeFiles/rebuild_cache.dir
+/home/mysql/RPC/build/example/CMakeFiles/edit_cache.dir
+/home/mysql/RPC/build/example/CMakeFiles/rebuild_cache.dir
+/home/mysql/RPC/build/example/callee/CMakeFiles/callee.dir
+/home/mysql/RPC/build/example/callee/CMakeFiles/edit_cache.dir
+/home/mysql/RPC/build/example/callee/CMakeFiles/rebuild_cache.dir
+/home/mysql/RPC/build/example/caller/CMakeFiles/caller.dir
+/home/mysql/RPC/build/example/caller/CMakeFiles/edit_cache.dir
+/home/mysql/RPC/build/example/caller/CMakeFiles/rebuild_cache.dir

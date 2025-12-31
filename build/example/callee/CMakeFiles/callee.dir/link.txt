@@ -1,0 +1,1 @@
+/opt/rh/devtoolset-9/root/usr/bin/c++ -rdynamic CMakeFiles/callee.dir/friend.pb.cc.o CMakeFiles/callee.dir/user.pb.cc.o CMakeFiles/callee.dir/userservice.cc.o -o ../../../bin/callee   -L/home/mysql/RPC/lib  -L/usr/local/lib  -Wl,-rpath,/home/mysql/RPC/lib:/usr/local/lib ../../../lib/libmprpc.a -lprotobuf -lmuduo_net -lmuduo_base -lpthread -lzookeeper_mt 

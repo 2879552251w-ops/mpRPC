@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package dongxia;
+
+import "user.proto";
+
+option cc_generic_services =true;
+
+
+message GetFriendRequest
+{
+    bytes name = 1;
+}
+
+
+message GetFriendResponse
+{
+    ResultCode result=1;
+    repeated bytes friendlist=2;
+}
+
+
+
+service FriendServiceRpc
+{
+    rpc GetFriend(GetFriendRequest) returns(GetFriendResponse);
+}
+
