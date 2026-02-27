@@ -2,6 +2,7 @@
 #include "mprpcapplication.h"
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
+#include "google-int.h"
 
 // 这是框架提供给外部使用的，可以发布rpc方法的函数接口
 void RpcProvider::NotifyService(google::protobuf::Service *service)
@@ -68,7 +69,7 @@ void RpcProvider::Run()
         // 3. 读取并反序列化 Header
         //    通过指针偏移直接构造 string，避免移动 buffer 指针
         std::string rpc_header_str(data + 4, header_size);
-        rpcheader::RequreMsg rpcHeader;
+        rpcheader::RequreMsg rpcHeader; //这里是一条tcp连接只传一种类型的模型，因此直接用rpcheader 不需要反射 端口与类型绑定
         std::string service_name;
         std::string method_name;
         uint32_t args_size;
@@ -124,7 +125,8 @@ void RpcProvider::Run()
         const google::protobuf::MethodDescriptor *method = mit->second;
 
         google::protobuf::Message *request = service->GetRequestPrototype(method).New();
-        if (!request->ParseFromString(args_str))
+        
+        if (!request->ParseFromString(args_str)) //考虑放进头里 FixMe
         {
             std::cout << "request parse error, content:" << args_str << std::endl;
             // 虽然业务解析失败，但网络包是完整的，所以还是继续处理下一个
@@ -132,7 +134,6 @@ void RpcProvider::Run()
         }
 
         google::protobuf::Message *response = service->GetResponsePrototype(method).New();
-
         google::protobuf::Closure *done = google::protobuf::NewCallback<RpcProvider, 
                                                                         const muduo::net::TcpConnectionPtr&, 
                                                                         google::protobuf::Message*>
@@ -148,6 +149,7 @@ void RpcProvider::Run()
     ZkClient zkcli;
     zkcli.Start();
 
+    //注册节点并绑定心跳
     for(auto &sp:serviceMap_)
     {
         std::string service_path="/"+sp.first;
@@ -169,7 +171,23 @@ void RpcProvider::Run()
 
 void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr &conn, google::protobuf::Message *responce)
 {
-    std::string resp;
+
+    //int len = google::protobuf::internal::ToCachedSize(responce->ByteSizeLong());  不会检查int溢出
+    int byte = google::protobuf::internal::ToIntSize(responce->ByteSizeLong()); //FixMe   in a function?
+    muduo::net::Buffer buf;
+    buf.ensureWritableBytes(byte);
+
+    uint8_t* start=reinterpret_cast<uint8_t*>(buf.beginWrite());
+    uint8_t* end = responce->SerializeWithCachedSizesToArray(start); //利用前文的ByteSizelong 或者ByteSize
+    //responce->SerializeToArray(start,byte);
+    if(static_cast<int>(end-start)!=byte)
+    {
+        ByteSizeConsistencyError(byte,google::protobuf::internal::ToIntSize(responce->ByteSizeLong()),static_cast<int>(end-start));
+    }
+    buf.hasWritten(byte);
+    conn->send(&buf);
+
+    /*std::string resp;
     if (responce->SerializeToString(&resp))
     {
         // 序列化成功后把结果返回过去，并且主动关闭连接
@@ -178,7 +196,7 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr &conn, goog
     else
     {
         std::cout << "Serialize failed" << std::endl;
-    }
+    }*/
     conn->shutdown();
     delete responce;
 }

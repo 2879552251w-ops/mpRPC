@@ -36,7 +36,8 @@ typedef std::function<void(const muduo::net::TcpConnectionPtr&,
                         const MessagePtr& mess,
                         muduo::Timestamp receivetime) const override
     {
-        callback_(conn,mess,receivetime);
+        auto p=std::static_pointer_cast<T> mess;
+        callback_(conn,p,receivetime);
     }
 
 private:
