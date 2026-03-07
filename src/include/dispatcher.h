@@ -44,14 +44,14 @@ private:
     ProtobufCallbackT callback_;
 };
 
-class ProtobufDispather
+class ProtobufDispatcher
 {
 public:
 typedef std::function<void(const muduo::net::TcpConnectionPtr&,
                         const MessagePtr&,
                         muduo::Timestamp)>  ProtobufCallback;
 
-ProtobufDispather(const ProtobufCallback& defaultcallback):defaultcallback_(defaultcallback)
+ProtobufDispatcher(const ProtobufCallback& defaultcallback):defaultcallback_(defaultcallback)
 {
 }
 

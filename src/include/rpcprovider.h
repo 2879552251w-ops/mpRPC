@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
+#include <functional>
 #include "google/protobuf/service.h"
 #include "google/protobuf/descriptor.h"
 #include <muduo/net/TcpServer.h>
@@ -8,10 +9,13 @@
 #include <muduo/net/InetAddress.h>
 #include <muduo/base/Timestamp.h>
 
+    using std::placeholders::_1;
+    using std::placeholders::_2;
+    using  std::placeholders::_3;
 //框架提供宝贵的专门服务发布rpc服务的网络对象类
 class RpcProvider
-{
-public:
+{    
+    public:
     //这是框架提供给外部使用的，可以发布rpc方法的函数接口
     void NotifyService(google::protobuf::Service *service);
 
@@ -31,5 +35,9 @@ private:
     //一个服务端应该有多个rpc服务，比如FriendService，GroupService
     std::unordered_map<std::string,ServiceInfo> serviceMap_;
 
+    void onMessage(const muduo::net::TcpConnectionPtr &conn,
+                                     muduo::net::Buffer *msg,
+                                     muduo::Timestamp);
+                              
     void SendRpcResponse(const muduo::net::TcpConnectionPtr&,google::protobuf::Message* );
-};
+};  

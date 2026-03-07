@@ -2,7 +2,7 @@
 #include "mprpcapplication.h"
 #include "rpcheader.pb.h"
 #include "zookeeperutil.h"
-#include "google-int.h"
+#include "google-inl.h"
 
 // 这是框架提供给外部使用的，可以发布rpc方法的函数接口
 void RpcProvider::NotifyService(google::protobuf::Service *service)
@@ -11,7 +11,7 @@ void RpcProvider::NotifyService(google::protobuf::Service *service)
     // 获取服务对象的描述信息
     const google::protobuf::ServiceDescriptor *pserviceDesc = service->GetDescriptor();
     // 获取服务名字
-    std::string service_name = pserviceDesc->name();
+    std::string service_name = pserviceDesc->full_name();
     // 获取服务对象的方法的数量
     int methodCnt = pserviceDesc->method_count();
 
@@ -19,7 +19,7 @@ void RpcProvider::NotifyService(google::protobuf::Service *service)
     {
         // 存储方法的名字和描述映射
         const google::protobuf::MethodDescriptor *pmethodDesc = pserviceDesc->method(i);
-        service_info.methodMap_[pmethodDesc->name()] = pmethodDesc;
+        service_info.methodMap_[pmethodDesc->full_name()] = pmethodDesc;
     }
     // 存储方法的对象指针
     service_info.service_ = service;
@@ -46,9 +46,68 @@ void RpcProvider::Run()
     // 其中header和body都是protobuf中自定义类型的序列化
     server.setMessageCallback([this](const muduo::net::TcpConnectionPtr &conn,
                                      muduo::net::Buffer *msg,
+                                     muduo::Timestamp time){this->onMessage(conn,msg,time);});
+
+    //连接zookeeper
+    ZkClient zkcli;
+    zkcli.Start();
+
+    //注册节点并绑定心跳
+    for(auto &sp:serviceMap_)
+    {
+        std::string service_path="/"+sp.first;
+        zkcli.Create(service_path.data(),nullptr,0);
+        for(auto& m:sp.second.methodMap_)
+        {
+            std::string method_path=service_path+"/"+m.first;
+            std::string method_data=ip+":"+std::to_string(port);
+            zkcli.Create(method_path.data(),method_data.data(),method_data.size(),ZOO_EPHEMERAL);
+        }
+    }
+    // 设置线程数量，启动网络
+    server.setThreadNum(4);
+    std::cout << "RpcProvide started with ip: " << ip << " port: " << port << std::endl;
+    server.start();
+    loop_.loop();
+}
+
+void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr &conn, google::protobuf::Message *responce)
+{
+
+    //int len = google::protobuf::internal::ToCachedSize(responce->ByteSizeLong());  不会检查int溢出
+    int byte = google::protobuf::internal::ToIntSize(responce->ByteSizeLong()); //FixMe   in a function?
+    muduo::net::Buffer buf;
+    buf.ensureWritableBytes(byte);
+
+    uint8_t* start=reinterpret_cast<uint8_t*>(buf.beginWrite());
+    uint8_t* end = responce->SerializeWithCachedSizesToArray(start); //利用前文的ByteSizelong 或者ByteSize
+    //responce->SerializeToArray(start,byte);
+    if(static_cast<int>(end-start)!=byte)
+    {
+        ByteSizeConsistencyError(byte,google::protobuf::internal::ToIntSize(responce->ByteSizeLong()),static_cast<int>(end-start));
+    }
+    buf.hasWritten(byte);
+    conn->send(&buf);
+
+    /*std::string resp;
+    if (responce->SerializeToString(&resp))
+    {
+        // 序列化成功后把结果返回过去，并且主动关闭连接
+        conn->send(resp);
+    }
+    else
+    {
+        std::cout << "Serialize failed" << std::endl;
+    }*/
+    conn->shutdown();
+    delete responce;
+}
+
+void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr &conn,
+                                     muduo::net::Buffer *msg,
                                      muduo::Timestamp)
-                              {
-             // 网络编程核心：解决 TCP 粘包问题
+{
+             //codec
     // 循环读取，因为一次数据到达可能包含多个完整的 RPC 请求
     while (msg->readableBytes() >= 4) 
     {
@@ -60,6 +119,8 @@ void RpcProvider::Run()
         header_size = *reinterpret_cast<const uint32_t*>(data);
         header_size=ntohl(header_size);  //防止主机字节序不一致，对方要调用htonl
         
+        //int len= msg->peekInt32();
+
         // 2. 判断缓冲区剩余数据是否足够读取 Header
         //    如果不够，说明包不完整，跳出循环等待下一次数据到达
         if (msg->readableBytes() < 4 + header_size) {
@@ -143,60 +204,7 @@ void RpcProvider::Run()
 
         service->CallMethod(method, nullptr, request, response, done);
         delete request;
-    } });
-
-    //连接zookeeper
-    ZkClient zkcli;
-    zkcli.Start();
-
-    //注册节点并绑定心跳
-    for(auto &sp:serviceMap_)
-    {
-        std::string service_path="/"+sp.first;
-        zkcli.Create(service_path.data(),nullptr,0);
-        for(auto& m:sp.second.methodMap_)
-        {
-            std::string method_path=service_path+"/"+m.first;
-            std::string method_data=ip+":"+std::to_string(port);
-            zkcli.Create(method_path.data(),method_data.data(),method_data.size(),ZOO_EPHEMERAL);
-        }
-    }
-
-    // 设置线程数量，启动网络
-    server.setThreadNum(4);
-    std::cout << "RpcProvide started with ip: " << ip << " port: " << port << std::endl;
-    server.start();
-    loop_.loop();
+    } 
 }
 
-void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr &conn, google::protobuf::Message *responce)
-{
-
-    //int len = google::protobuf::internal::ToCachedSize(responce->ByteSizeLong());  不会检查int溢出
-    int byte = google::protobuf::internal::ToIntSize(responce->ByteSizeLong()); //FixMe   in a function?
-    muduo::net::Buffer buf;
-    buf.ensureWritableBytes(byte);
-
-    uint8_t* start=reinterpret_cast<uint8_t*>(buf.beginWrite());
-    uint8_t* end = responce->SerializeWithCachedSizesToArray(start); //利用前文的ByteSizelong 或者ByteSize
-    //responce->SerializeToArray(start,byte);
-    if(static_cast<int>(end-start)!=byte)
-    {
-        ByteSizeConsistencyError(byte,google::protobuf::internal::ToIntSize(responce->ByteSizeLong()),static_cast<int>(end-start));
-    }
-    buf.hasWritten(byte);
-    conn->send(&buf);
-
-    /*std::string resp;
-    if (responce->SerializeToString(&resp))
-    {
-        // 序列化成功后把结果返回过去，并且主动关闭连接
-        conn->send(resp);
-    }
-    else
-    {
-        std::cout << "Serialize failed" << std::endl;
-    }*/
-    conn->shutdown();
-    delete responce;
-}
+    
