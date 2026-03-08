@@ -46,7 +46,7 @@ void RpcProvider::Run()
     // 其中header和body都是protobuf中自定义类型的序列化
     server.setMessageCallback([this](const muduo::net::TcpConnectionPtr &conn,
                                      muduo::net::Buffer *msg,
-                                     muduo::Timestamp time){this->onMessage(conn,msg,time);});
+                                     muduo::Timestamp time) mutable {this->onMessage(conn,msg,time);});
 
     //连接zookeeper
     ZkClient zkcli;

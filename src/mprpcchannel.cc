@@ -47,7 +47,7 @@ void myChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     if (rpcheader.SerializeToString(&header))
     {
         headersize = header.size();
-        headersize = htonl(headersize);  //防止主机字节序不一致，对方要调用ntohl
+        headersize = htonl(headersize); // 防止主机字节序不一致，对方要调用ntohl
     }
     else
     {
@@ -59,8 +59,7 @@ void myChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     // 报文拼接
     std::string msg = std::string(reinterpret_cast<char *>(&headersize), 4) +
                       header + arg_str;
-    //这里已经拼接好一个完整的RPC调用报文了
-
+    // 这里已经拼接好一个完整的RPC调用报文了
 
     // 建立连接发起调用;
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -71,28 +70,28 @@ void myChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
         return;
     }
 
-    //从配置文件找到ip：port
-    //std::string ip = MprpcApplication::GetInstance().getconfig().Load("rpcserverip");
-    //uint16_t port = stoi(MprpcApplication::GetInstance().getconfig().Load("rpcserverport"));
-    
+    // 从配置文件找到ip：port
+    // std::string ip = MprpcApplication::GetInstance().getconfig().Load("rpcserverip");
+    // uint16_t port = stoi(MprpcApplication::GetInstance().getconfig().Load("rpcserverport"));
+
     ZkClient zkcli;
     zkcli.Start();
 
-    std::string method_path = "/" + service_name +"/" + method_name;
-    std::string host_data =zkcli.GetData(method_path.data());
-    if(host_data=="")
+    std::string method_path = "/" + service_name + "/" + method_name;
+    std::string host_data = zkcli.GetData(method_path.data());
+    if (host_data == "")
     {
-        controller->SetFailed(method_path+"is not exist");
+        controller->SetFailed(method_path + "is not exist");
         return;
     }
     int idx = host_data.find(":");
-    if(idx==-1)
+    if (idx == -1)
     {
-        controller->SetFailed(method_path+"address is invalid");
+        controller->SetFailed(method_path + "address is invalid");
         return;
     }
-    std::string ip = host_data.substr(0,idx);
-    uint16_t port =atoi(host_data.substr(idx+1).c_str());
+    std::string ip = host_data.substr(0, idx);
+    uint16_t port = atoi(host_data.substr(idx + 1).c_str());
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -115,29 +114,29 @@ void myChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
         return;
     }
 
-/*
-    char buf[1024] = {0};
-    int len = recv(fd, buf, 1024, 0);
-    if (len == -1)
-    {
-        std::cout << "recv failed" << std::endl;
-        close(fd);
-        return;
-    }
-    std::string response_str(buf, len);
-    if (!response->ParseFromString(response_str))
-    {
-        std::cout << "parse failed" << std::endl;
-        close(fd);
-        return;
-    }
-*/
-     // 建立 socket ... connect ... send ... (保持不变)
+    /*
+        char buf[1024] = {0};
+        int len = recv(fd, buf, 1024, 0);
+        if (len == -1)
+        {
+            std::cout << "recv failed" << std::endl;
+            close(fd);
+            return;
+        }
+        std::string response_str(buf, len);
+        if (!response->ParseFromString(response_str))
+        {
+            std::cout << "parse failed" << std::endl;
+            close(fd);
+            return;
+        }
+    */
+    // 建立 socket ... connect ... send ... (保持不变)
 
     // 【修改部分】接收响应
     char buf[1024] = {0};
     std::string response_str;
-    
+
     // 循环读取，直到服务端关闭连接 (recv返回0) 或者出错
     while (true)
     {
@@ -164,6 +163,28 @@ void myChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
         close(fd);
         return;
     }
-    
+
     close(fd);
+}
+
+void longChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
+                             google::protobuf::RpcController *controller,
+                             const google::protobuf::Message *request,
+                             google::protobuf::Message *response,
+                             google::protobuf::Closure *done)
+{
+    RpcMessage message;
+    message.set_type(REQUEST);
+    int64_t id = id_.incrementAndGet();
+    message.set_id(id);
+    message.set_service(method->service()->full_name());
+    message.set_method(method->name());
+    message.set_request(request->SerializeAsString()); // FIXME: error check
+
+    OutstandingCall out = {response, done};
+    {
+        MutexLockGuard lock(mutex_);
+        outstandings_[id] = out;
+    }
+    codec_.send(conn_, message);
 }

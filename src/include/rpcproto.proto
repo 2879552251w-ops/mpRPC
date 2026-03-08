@@ -26,9 +26,9 @@ message RpcMessage
 
    string service = 3;
    string method = 4;
-   bytes request = 5;
+   optional bytes request = 5;
 
-   bytes response = 6;
+   optional bytes response = 6;
 
-   ErrorCode error = 7;
+   optional ErrorCode error = 7;
 }

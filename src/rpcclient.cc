@@ -1,6 +1,7 @@
 #include <rpcclient.h>
 #include <rpcproto.pb.h>
-
+#include <assert.h>
+using namespace dongxia;
 void RpcClient::onConnection(const muduo::net::TcpConnectionPtr &conn)
     {
         LOG_INFO << conn->localAddress().toIpPort() << " -> "
@@ -22,7 +23,7 @@ void RpcClient::onRpcMessage(const muduo::net::TcpConnectionPtr &conn,
                       muduo::Timestamp resvtime)
     {
         RpcMessage &message = *messagePtr;
-        if (message.type() == RESPONSE)
+        if (message.type() == dongxia::RESPONSE)
         {
             int64_t id = message.id();
             assert(message.has_response() || message.has_error());
@@ -30,7 +31,7 @@ void RpcClient::onRpcMessage(const muduo::net::TcpConnectionPtr &conn,
             OutstandingCall out = {NULL, NULL};
 
             {
-                MutexLockGuard lock(mutex_);
+                std::lock_guard<std::mutex> lock(mutex_);
                 std::map<int64_t, OutstandingCall>::iterator it = outstandings_.find(id);
                 if (it != outstandings_.end())
                 {

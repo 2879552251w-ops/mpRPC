@@ -270,7 +270,11 @@ class RpcMessage final :
   std::string* _internal_mutable_method();
   public:
 
-  // bytes request = 5;
+  // optional bytes request = 5;
+  bool has_request() const;
+  private:
+  bool _internal_has_request() const;
+  public:
   void clear_request();
   const std::string& request() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -284,7 +288,11 @@ class RpcMessage final :
   std::string* _internal_mutable_request();
   public:
 
-  // bytes response = 6;
+  // optional bytes response = 6;
+  bool has_response() const;
+  private:
+  bool _internal_has_response() const;
+  public:
   void clear_response();
   const std::string& response() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -316,7 +324,11 @@ class RpcMessage final :
   void _internal_set_type(::dongxia::MessageType value);
   public:
 
-  // .dongxia.ErrorCode error = 7;
+  // optional .dongxia.ErrorCode error = 7;
+  bool has_error() const;
+  private:
+  bool _internal_has_error() const;
+  public:
   void clear_error();
   ::dongxia::ErrorCode error() const;
   void set_error(::dongxia::ErrorCode value);
@@ -333,6 +345,8 @@ class RpcMessage final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr service_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr method_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr request_;
@@ -340,7 +354,6 @@ class RpcMessage final :
     uint64_t id_;
     int type_;
     int error_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_rpcproto_2eproto;
@@ -496,9 +509,17 @@ inline void RpcMessage::set_allocated_method(std::string* method) {
   // @@protoc_insertion_point(field_set_allocated:dongxia.RpcMessage.method)
 }
 
-// bytes request = 5;
+// optional bytes request = 5;
+inline bool RpcMessage::_internal_has_request() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool RpcMessage::has_request() const {
+  return _internal_has_request();
+}
 inline void RpcMessage::clear_request() {
   _impl_.request_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& RpcMessage::request() const {
   // @@protoc_insertion_point(field_get:dongxia.RpcMessage.request)
@@ -507,7 +528,7 @@ inline const std::string& RpcMessage::request() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void RpcMessage::set_request(ArgT0&& arg0, ArgT... args) {
- 
+ _impl_._has_bits_[0] |= 0x00000001u;
  _impl_.request_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:dongxia.RpcMessage.request)
 }
@@ -520,22 +541,32 @@ inline const std::string& RpcMessage::_internal_request() const {
   return _impl_.request_.Get();
 }
 inline void RpcMessage::_internal_set_request(const std::string& value) {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.request_.Set(value, GetArenaForAllocation());
 }
 inline std::string* RpcMessage::_internal_mutable_request() {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   return _impl_.request_.Mutable(GetArenaForAllocation());
 }
 inline std::string* RpcMessage::release_request() {
   // @@protoc_insertion_point(field_release:dongxia.RpcMessage.request)
-  return _impl_.request_.Release();
+  if (!_internal_has_request()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.request_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.request_.IsDefault()) {
+    _impl_.request_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
 }
 inline void RpcMessage::set_allocated_request(std::string* request) {
   if (request != nullptr) {
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.request_.SetAllocated(request, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -546,9 +577,17 @@ inline void RpcMessage::set_allocated_request(std::string* request) {
   // @@protoc_insertion_point(field_set_allocated:dongxia.RpcMessage.request)
 }
 
-// bytes response = 6;
+// optional bytes response = 6;
+inline bool RpcMessage::_internal_has_response() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool RpcMessage::has_response() const {
+  return _internal_has_response();
+}
 inline void RpcMessage::clear_response() {
   _impl_.response_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& RpcMessage::response() const {
   // @@protoc_insertion_point(field_get:dongxia.RpcMessage.response)
@@ -557,7 +596,7 @@ inline const std::string& RpcMessage::response() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void RpcMessage::set_response(ArgT0&& arg0, ArgT... args) {
- 
+ _impl_._has_bits_[0] |= 0x00000002u;
  _impl_.response_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:dongxia.RpcMessage.response)
 }
@@ -570,22 +609,32 @@ inline const std::string& RpcMessage::_internal_response() const {
   return _impl_.response_.Get();
 }
 inline void RpcMessage::_internal_set_response(const std::string& value) {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   _impl_.response_.Set(value, GetArenaForAllocation());
 }
 inline std::string* RpcMessage::_internal_mutable_response() {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   return _impl_.response_.Mutable(GetArenaForAllocation());
 }
 inline std::string* RpcMessage::release_response() {
   // @@protoc_insertion_point(field_release:dongxia.RpcMessage.response)
-  return _impl_.response_.Release();
+  if (!_internal_has_response()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  auto* p = _impl_.response_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.response_.IsDefault()) {
+    _impl_.response_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
 }
 inline void RpcMessage::set_allocated_response(std::string* response) {
   if (response != nullptr) {
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.response_.SetAllocated(response, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -596,9 +645,17 @@ inline void RpcMessage::set_allocated_response(std::string* response) {
   // @@protoc_insertion_point(field_set_allocated:dongxia.RpcMessage.response)
 }
 
-// .dongxia.ErrorCode error = 7;
+// optional .dongxia.ErrorCode error = 7;
+inline bool RpcMessage::_internal_has_error() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool RpcMessage::has_error() const {
+  return _internal_has_error();
+}
 inline void RpcMessage::clear_error() {
   _impl_.error_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline ::dongxia::ErrorCode RpcMessage::_internal_error() const {
   return static_cast< ::dongxia::ErrorCode >(_impl_.error_);
@@ -608,7 +665,7 @@ inline ::dongxia::ErrorCode RpcMessage::error() const {
   return _internal_error();
 }
 inline void RpcMessage::_internal_set_error(::dongxia::ErrorCode value) {
-  
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.error_ = value;
 }
 inline void RpcMessage::set_error(::dongxia::ErrorCode value) {

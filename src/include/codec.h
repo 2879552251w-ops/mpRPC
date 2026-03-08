@@ -75,6 +75,6 @@ class ProtobufCodec : muduo::noncopyable
 
   const static int kHeaderLen = sizeof(int32_t);
   const static int kMinMessageLen = 2*kHeaderLen + 2; // nameLen + typeName + checkSum
-  const static int kMaxMessageLen = 64*1024*1024; // same as codec_stream.h kDefaultTotalBytesLimit
+  const static int kMaxMessageLen = 64*1024*1024; 
 };
 

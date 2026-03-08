@@ -23,14 +23,15 @@ namespace _pbi = _pb::internal;
 namespace dongxia {
 PROTOBUF_CONSTEXPR RpcMessage::RpcMessage(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.service_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.service_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.method_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.request_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.response_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.id_)*/uint64_t{0u}
   , /*decltype(_impl_.type_)*/0
-  , /*decltype(_impl_.error_)*/0
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+  , /*decltype(_impl_.error_)*/0} {}
 struct RpcMessageDefaultTypeInternal {
   PROTOBUF_CONSTEXPR RpcMessageDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -46,7 +47,7 @@ static const ::_pb::EnumDescriptor* file_level_enum_descriptors_rpcproto_2eproto
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_rpcproto_2eproto = nullptr;
 
 const uint32_t TableStruct_rpcproto_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::dongxia::RpcMessage, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::dongxia::RpcMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -59,9 +60,16 @@ const uint32_t TableStruct_rpcproto_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::dongxia::RpcMessage, _impl_.request_),
   PROTOBUF_FIELD_OFFSET(::dongxia::RpcMessage, _impl_.response_),
   PROTOBUF_FIELD_OFFSET(::dongxia::RpcMessage, _impl_.error_),
+  ~0u,
+  ~0u,
+  ~0u,
+  ~0u,
+  0,
+  1,
+  2,
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::dongxia::RpcMessage)},
+  { 0, 13, -1, sizeof(::dongxia::RpcMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -69,20 +77,21 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 
 const char descriptor_table_protodef_rpcproto_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\016rpcproto.proto\022\007dongxia\"\243\001\n\nRpcMessage"
+  "\n\016rpcproto.proto\022\007dongxia\"\325\001\n\nRpcMessage"
   "\022\"\n\004type\030\001 \001(\0162\024.dongxia.MessageType\022\n\n\002"
   "id\030\002 \001(\006\022\017\n\007service\030\003 \001(\t\022\016\n\006method\030\004 \001("
-  "\t\022\017\n\007request\030\005 \001(\014\022\020\n\010response\030\006 \001(\014\022!\n\005"
-  "error\030\007 \001(\0162\022.dongxia.ErrorCode*3\n\013Messa"
-  "geType\022\013\n\007REQUEST\020\000\022\014\n\010RESPONSE\020\001\022\t\n\005ERR"
-  "OR\020\002*\201\001\n\tErrorCode\022\014\n\010NO_ERROR\020\000\022\017\n\013WRON"
-  "G_PROTO\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tNO_METHOD\020\003"
-  "\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVALID_RESPONS"
-  "E\020\005\022\013\n\007TIMEOUT\020\006b\006proto3"
+  "\t\022\024\n\007request\030\005 \001(\014H\000\210\001\001\022\025\n\010response\030\006 \001("
+  "\014H\001\210\001\001\022&\n\005error\030\007 \001(\0162\022.dongxia.ErrorCod"
+  "eH\002\210\001\001B\n\n\010_requestB\013\n\t_responseB\010\n\006_erro"
+  "r*3\n\013MessageType\022\013\n\007REQUEST\020\000\022\014\n\010RESPONS"
+  "E\020\001\022\t\n\005ERROR\020\002*\201\001\n\tErrorCode\022\014\n\010NO_ERROR"
+  "\020\000\022\017\n\013WRONG_PROTO\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tN"
+  "O_METHOD\020\003\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVAL"
+  "ID_RESPONSE\020\005\022\013\n\007TIMEOUT\020\006b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_rpcproto_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_rpcproto_2eproto = {
-    false, false, 384, descriptor_table_protodef_rpcproto_2eproto,
+    false, false, 434, descriptor_table_protodef_rpcproto_2eproto,
     "rpcproto.proto",
     &descriptor_table_rpcproto_2eproto_once, nullptr, 0, 1,
     schemas, file_default_instances, TableStruct_rpcproto_2eproto::offsets,
@@ -135,6 +144,16 @@ bool ErrorCode_IsValid(int value) {
 
 class RpcMessage::_Internal {
  public:
+  using HasBits = decltype(std::declval<RpcMessage>()._impl_._has_bits_);
+  static void set_has_request(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_response(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_error(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
 };
 
 RpcMessage::RpcMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -147,14 +166,15 @@ RpcMessage::RpcMessage(const RpcMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   RpcMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.service_){}
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.service_){}
     , decltype(_impl_.method_){}
     , decltype(_impl_.request_){}
     , decltype(_impl_.response_){}
     , decltype(_impl_.id_){}
     , decltype(_impl_.type_){}
-    , decltype(_impl_.error_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+    , decltype(_impl_.error_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.service_.InitDefault();
@@ -177,7 +197,7 @@ RpcMessage::RpcMessage(const RpcMessage& from)
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.request_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_request().empty()) {
+  if (from._internal_has_request()) {
     _this->_impl_.request_.Set(from._internal_request(), 
       _this->GetArenaForAllocation());
   }
@@ -185,7 +205,7 @@ RpcMessage::RpcMessage(const RpcMessage& from)
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.response_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_response().empty()) {
+  if (from._internal_has_response()) {
     _this->_impl_.response_.Set(from._internal_response(), 
       _this->GetArenaForAllocation());
   }
@@ -200,14 +220,15 @@ inline void RpcMessage::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.service_){}
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.service_){}
     , decltype(_impl_.method_){}
     , decltype(_impl_.request_){}
     , decltype(_impl_.response_){}
     , decltype(_impl_.id_){uint64_t{0u}}
     , decltype(_impl_.type_){0}
     , decltype(_impl_.error_){0}
-    , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.service_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -256,16 +277,26 @@ void RpcMessage::Clear() {
 
   _impl_.service_.ClearToEmpty();
   _impl_.method_.ClearToEmpty();
-  _impl_.request_.ClearToEmpty();
-  _impl_.response_.ClearToEmpty();
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _impl_.request_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _impl_.response_.ClearNonDefaultToEmpty();
+    }
+  }
   ::memset(&_impl_.id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.error_) -
-      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.error_));
+      reinterpret_cast<char*>(&_impl_.type_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.type_));
+  _impl_.error_ = 0;
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* RpcMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
@@ -307,7 +338,7 @@ const char* RpcMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ct
         } else
           goto handle_unusual;
         continue;
-      // bytes request = 5;
+      // optional bytes request = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_request();
@@ -316,7 +347,7 @@ const char* RpcMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ct
         } else
           goto handle_unusual;
         continue;
-      // bytes response = 6;
+      // optional bytes response = 6;
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           auto str = _internal_mutable_response();
@@ -325,7 +356,7 @@ const char* RpcMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ct
         } else
           goto handle_unusual;
         continue;
-      // .dongxia.ErrorCode error = 7;
+      // optional .dongxia.ErrorCode error = 7;
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
           uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
@@ -350,6 +381,7 @@ const char* RpcMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ct
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -396,20 +428,20 @@ uint8_t* RpcMessage::_InternalSerialize(
         4, this->_internal_method(), target);
   }
 
-  // bytes request = 5;
-  if (!this->_internal_request().empty()) {
+  // optional bytes request = 5;
+  if (_internal_has_request()) {
     target = stream->WriteBytesMaybeAliased(
         5, this->_internal_request(), target);
   }
 
-  // bytes response = 6;
-  if (!this->_internal_response().empty()) {
+  // optional bytes response = 6;
+  if (_internal_has_response()) {
     target = stream->WriteBytesMaybeAliased(
         6, this->_internal_response(), target);
   }
 
-  // .dongxia.ErrorCode error = 7;
-  if (this->_internal_error() != 0) {
+  // optional .dongxia.ErrorCode error = 7;
+  if (_internal_has_error()) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
       7, this->_internal_error(), target);
@@ -445,20 +477,23 @@ size_t RpcMessage::ByteSizeLong() const {
         this->_internal_method());
   }
 
-  // bytes request = 5;
-  if (!this->_internal_request().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_request());
-  }
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    // optional bytes request = 5;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+          this->_internal_request());
+    }
 
-  // bytes response = 6;
-  if (!this->_internal_response().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_response());
-  }
+    // optional bytes response = 6;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+          this->_internal_response());
+    }
 
+  }
   // fixed64 id = 2;
   if (this->_internal_id() != 0) {
     total_size += 1 + 8;
@@ -470,8 +505,8 @@ size_t RpcMessage::ByteSizeLong() const {
       ::_pbi::WireFormatLite::EnumSize(this->_internal_type());
   }
 
-  // .dongxia.ErrorCode error = 7;
-  if (this->_internal_error() != 0) {
+  // optional .dongxia.ErrorCode error = 7;
+  if (cached_has_bits & 0x00000004u) {
     total_size += 1 +
       ::_pbi::WireFormatLite::EnumSize(this->_internal_error());
   }
@@ -500,11 +535,14 @@ void RpcMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PRO
   if (!from._internal_method().empty()) {
     _this->_internal_set_method(from._internal_method());
   }
-  if (!from._internal_request().empty()) {
-    _this->_internal_set_request(from._internal_request());
-  }
-  if (!from._internal_response().empty()) {
-    _this->_internal_set_response(from._internal_response());
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_set_request(from._internal_request());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_set_response(from._internal_response());
+    }
   }
   if (from._internal_id() != 0) {
     _this->_internal_set_id(from._internal_id());
@@ -512,7 +550,7 @@ void RpcMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PRO
   if (from._internal_type() != 0) {
     _this->_internal_set_type(from._internal_type());
   }
-  if (from._internal_error() != 0) {
+  if (cached_has_bits & 0x00000004u) {
     _this->_internal_set_error(from._internal_error());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -534,6 +572,7 @@ void RpcMessage::InternalSwap(RpcMessage* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.service_, lhs_arena,
       &other->_impl_.service_, rhs_arena
