@@ -1,3 +1,4 @@
+#pragma once
 #include "codec.h"
 #include "dispatcher.h"
 

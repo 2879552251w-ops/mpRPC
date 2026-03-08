@@ -15,7 +15,7 @@
 //框架提供宝贵的专门服务发布rpc服务的网络对象类
 class RpcProvider
 {    
-    public:
+public:
     //这是框架提供给外部使用的，可以发布rpc方法的函数接口
     void NotifyService(google::protobuf::Service *service);
 
@@ -35,9 +35,7 @@ private:
     //一个服务端应该有多个rpc服务，比如FriendService，GroupService
     std::unordered_map<std::string,ServiceInfo> serviceMap_;
 
-    void onMessage(const muduo::net::TcpConnectionPtr &conn,
-                                     muduo::net::Buffer *msg,
-                                     muduo::Timestamp);
+    void onMessage(const muduo::net::TcpConnectionPtr &conn,muduo::net::Buffer*,muduo::Timestamp);
                               
     void SendRpcResponse(const muduo::net::TcpConnectionPtr&,google::protobuf::Message* );
 };  
