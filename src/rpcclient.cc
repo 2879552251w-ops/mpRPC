@@ -54,3 +54,22 @@ void RpcClient::onRpcMessage(const muduo::net::TcpConnectionPtr &conn,
             }
         }
     }
+
+
+void RpcClient::insertClosure(int64_t id,const OutstandingCall& closure)
+{
+    insertclosureinloop(id,closure);
+}
+
+void RpcClient::insertclosureinloop(int64_t id,const OutstandingCall& closure)
+{
+    client_.connection()->getLoop()->runInLoop([this,closure,id]
+    {
+        this->outstandings_[id]=closure;
+    });
+}
+
+void RpcClient::send(const muduo::net::TcpConnectionPtr& conn,const google::protobuf::Message& msg)
+{
+    codec_.send(conn,msg);
+}

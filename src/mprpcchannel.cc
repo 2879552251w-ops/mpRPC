@@ -1,5 +1,6 @@
 #include "mprpcchannel.h"
 #include "google/protobuf/message.h"
+#include "rpcproto.pb.h"
 #include "rpcheader.pb.h"
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -9,6 +10,13 @@
 #include "mprpcapplication.h"
 #include "mprpccontroller.h"
 #include "zookeeperutil.h"
+
+int64_t getid()
+{
+    static int64_t id=0;
+    return id++;
+}
+
 
 // headersize + header + args(body)
 
@@ -167,24 +175,23 @@ void myChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     close(fd);
 }
 
+using namespace dongxia;
+
 void longChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
                              google::protobuf::RpcController *controller,
                              const google::protobuf::Message *request,
                              google::protobuf::Message *response,
                              google::protobuf::Closure *done)
 {
-    RpcMessage message;
+    dongxia::RpcMessage message;
     message.set_type(REQUEST);
-    int64_t id = id_.incrementAndGet();
+    int64_t id = getid();
     message.set_id(id);
     message.set_service(method->service()->full_name());
     message.set_method(method->name());
     message.set_request(request->SerializeAsString()); // FIXME: error check
 
     OutstandingCall out = {response, done};
-    {
-        MutexLockGuard lock(mutex_);
-        outstandings_[id] = out;
-    }
-    codec_.send(conn_, message);
+    client_->insertClosure(id,out);
+    client_->send(conn_, message);
 }

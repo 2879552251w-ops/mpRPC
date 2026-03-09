@@ -13,68 +13,67 @@
 //   int32_t  checkSum; // adler32 of nameLen, typeName and protobufData
 // }
 
-using MessagePtr=std::shared_ptr<google::protobuf::Message> ;
+using MessagePtr = std::shared_ptr<google::protobuf::Message>;
 class ProtobufCodec : muduo::noncopyable
 {
- public:
+public:
+    enum ErrorCode
+    {
+        kNoError = 0,
+        kInvalidLength,
+        kCheckSumError,
+        kInvalidNameLen,
+        kUnknownMessageType,
+        kParseError,
+    };
 
-  enum ErrorCode
-  {
-    kNoError = 0,
-    kInvalidLength,
-    kCheckSumError,
-    kInvalidNameLen,
-    kUnknownMessageType,
-    kParseError,
-  };
+    typedef std::function<void(const muduo::net::TcpConnectionPtr &,
+                               const MessagePtr &,
+                               muduo::Timestamp)>
+        ProtobufMessageCallback;
 
-  typedef std::function<void (const muduo::net::TcpConnectionPtr&,
-                                const MessagePtr&,
-                                muduo::Timestamp)> ProtobufMessageCallback;
+    typedef std::function<void(const muduo::net::TcpConnectionPtr &,
+                               muduo::net::Buffer *,
+                               muduo::Timestamp,
+                               ErrorCode)>
+        ErrorCallback;
 
-  typedef std::function<void (const muduo::net::TcpConnectionPtr&,
-                                muduo::net::Buffer*,
-                                muduo::Timestamp,
-                                ErrorCode)> ErrorCallback;
+    explicit ProtobufCodec(const ProtobufMessageCallback &messageCb)
+        : messageCallback_(messageCb),
+          errorCallback_(defaultErrorCallback)
+    {
+    }
 
-  explicit ProtobufCodec(const ProtobufMessageCallback& messageCb)
-    : messageCallback_(messageCb),
-      errorCallback_(defaultErrorCallback)
-  {
-  }
+    ProtobufCodec(const ProtobufMessageCallback &messageCb, const ErrorCallback &errorCb)
+        : messageCallback_(messageCb),
+          errorCallback_(errorCb)
+    {
+    }
 
-  ProtobufCodec(const ProtobufMessageCallback& messageCb, const ErrorCallback& errorCb)
-    : messageCallback_(messageCb),
-      errorCallback_(errorCb)
-  {
-  }
+    void onMessage(const muduo::net::TcpConnectionPtr &conn,
+                   muduo::net::Buffer *buf,
+                   muduo::Timestamp receiveTime);
 
-  void onMessage(const muduo::net::TcpConnectionPtr& conn,
-                 muduo::net::Buffer* buf,
-                 muduo::Timestamp receiveTime);
+    void fillbuffer(muduo::net::Buffer *buf,
+                    const google::protobuf::Message &message);
 
-  void send(const muduo::net::TcpConnectionPtr& conn,
-            const google::protobuf::Message& message)
-  {
-    muduo::net::Buffer buf;
-    conn->send(&buf);
-  }
+    void send(const muduo::net::TcpConnectionPtr &conn,
+              const google::protobuf::Message &message);
 
-  static const muduo::string& errorCodeToString(ErrorCode errorCode);
-  static google::protobuf::Message* createMessage(const std::string& type_name);
-  static MessagePtr parse(const char* buf, int len, ErrorCode* errorCode);
+    static const muduo::string &errorCodeToString(ErrorCode errorCode);
+    static google::protobuf::Message *createMessage(const std::string &type_name);
+    static MessagePtr parse(const char *buf, int len, ErrorCode *errorCode);
 
- private:
-  static void defaultErrorCallback(const muduo::net::TcpConnectionPtr&,
-                                   muduo::net::Buffer*,
-                                   muduo::Timestamp,
-                                   ErrorCode);
+private:
+    static void defaultErrorCallback(const muduo::net::TcpConnectionPtr &,
+                                     muduo::net::Buffer *,
+                                     muduo::Timestamp,
+                                     ErrorCode);
 
-  ProtobufMessageCallback messageCallback_;
-  ErrorCallback errorCallback_;
+    ProtobufMessageCallback messageCallback_;
+    ErrorCallback errorCallback_;
 
-  const static int kHeaderLen = sizeof(int32_t);
-  const static int kMinMessageLen = 2*kHeaderLen + 2; // nameLen + typeName + checkSum
-  const static int kMaxMessageLen = 64*1024*1024; 
+    const static int kHeaderLen = sizeof(int32_t);
+    const static int kMinMessageLen = 2 * kHeaderLen + 2; // nameLen + typeName + checkSum
+    const static int kMaxMessageLen = 64 * 1024 * 1024;
 };
-

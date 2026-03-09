@@ -50,7 +50,9 @@ public:
     void onRpcMessage(const muduo::net::TcpConnectionPtr &conn,
                       const RpcMessagePtr &messagePtr,
                       muduo::Timestamp resvtime);
-
+    struct OutstandingCall;
+    void insertClosure(int64_t,const OutstandingCall&);
+    void send(const muduo::net::TcpConnectionPtr& conn,const google::protobuf::Message&);
 private:
     struct OutstandingCall
     {
@@ -65,6 +67,7 @@ private:
     ProtobufCodec codec_;
     std::mutex mutex_;
     callbackMap outstandings_;
+    void insertclosureinloop(int64_t,const OutstandingCall&);
 
 };
 }
