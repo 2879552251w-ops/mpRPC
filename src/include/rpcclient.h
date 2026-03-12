@@ -6,9 +6,14 @@
 #include <muduo/net/EventLoop.h>
 #include <muduo/base/Logging.h>
 #include <muduo/net/Callbacks.h>
-#include <mprpcchannel.h>
+
 namespace dongxia
 {
+struct OutstandingCall
+{
+    ::google::protobuf::Message *response;
+    ::google::protobuf::Closure *done;
+};
 
 class RpcMessage;
 using RpcMessagePtr = std::shared_ptr<RpcMessage>;
@@ -50,15 +55,9 @@ public:
     void onRpcMessage(const muduo::net::TcpConnectionPtr &conn,
                       const RpcMessagePtr &messagePtr,
                       muduo::Timestamp resvtime);
-    struct OutstandingCall;
     void insertClosure(int64_t,const OutstandingCall&);
-    void send(const muduo::net::TcpConnectionPtr& conn,const google::protobuf::Message&);
+    void send(const google::protobuf::Message&); 
 private:
-    struct OutstandingCall
-    {
-        ::google::protobuf::Message *response;
-        ::google::protobuf::Closure *done;
-    };
     using callbackMap = std::map<int64_t, OutstandingCall>;
 
     muduo::net::EventLoop *loop_;

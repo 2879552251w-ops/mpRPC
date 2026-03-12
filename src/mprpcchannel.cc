@@ -17,6 +17,7 @@ int64_t getid()
     return id++;
 }
 
+using namespace dongxia;
 
 // headersize + header + args(body)
 
@@ -175,8 +176,6 @@ void myChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     close(fd);
 }
 
-using namespace dongxia;
-
 void longChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
                              google::protobuf::RpcController *controller,
                              const google::protobuf::Message *request,
@@ -191,7 +190,7 @@ void longChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     message.set_method(method->name());
     message.set_request(request->SerializeAsString()); // FIXME: error check
 
-    OutstandingCall out = {response, done};
-    client_->insertClosure(id,out);
-    client_->send(conn_, message);
+    dongxia::OutstandingCall out = {response, done};
+    rpcclient_->insertClosure(id,out);
+    rpcclient_->send(message);
 }
